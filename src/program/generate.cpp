@@ -14339,6 +14339,9 @@ int main(int argc, char** argv) {
             if ((int64_t) free_b < want_free) {
                 const int64_t floor_b = xcache.bytes_of(floor_slots);
                 int64_t keep = mapped - (want_free - (int64_t) free_b);
+                // shrink rounds up; keep whole segments so it does not round the reserve down.
+                const int64_t segment = xcache.segment_bytes();
+                keep = keep / segment * segment;
                 if (keep < floor_b) {
                     keep = floor_b;
                     note = " (the cache keeps its smallest size: the prompt path's buffers)";

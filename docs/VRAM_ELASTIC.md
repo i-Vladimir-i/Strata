@@ -52,9 +52,9 @@ Content-Type: application/json          (anything else: 415)
 
 - **Shrink.** The engine frees the shortfall, but never goes below its floor: 128 slots plus the smallest prompt-path
   loan (a 256-token chunk). At the floor the call still answers 200 with `vram_free_mib` below the reserve. The log
-  line says `(the cache keeps its smallest size: the prompt path's buffers)`. Segments are given back whole, and the
-  engine keeps enough segments to cover what must stay, so the free VRAM can end a segment (512 MiB by default)
-  short of the reserve **(code)**.
+  line says `(the cache keeps its smallest size: the prompt path's buffers)`. Segments are given back whole. Before
+  the shrink, the engine rounds the cache bytes to keep down to a whole segment, then applies the floor. This
+  avoids missing a reachable reserve because the cache keeps a partially needed segment **(code)**.
 - **Grow.** It maps segments until the VRAM that is free beyond the reserve is used, or the cache is full. If the driver
   has no VRAM for the next segment the cache stays smaller and the call still answers 200; the reason is only in the
   server window (`(the driver has no VRAM for another expert-cache segment)`).
